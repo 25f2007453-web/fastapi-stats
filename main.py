@@ -84,14 +84,14 @@ def get_stats(values: str = Query(...)):
 @app.post("/verify")
 def verify_token(payload: TokenRequest):
     try:
-        # Decode without strict options first to check signature, issuer, audience, and exp manually if needed
         decoded = jwt.decode(
             payload.token,
             PUBLIC_KEY,
             algorithms=["RS256"],
             audience=EXPECTED_AUDIENCE,
             issuer=EXPECTED_ISSUER,
-            options={"verify_exp": True}
+            options={"verify_exp": True},
+            leeway=120
         )
         return {
             "valid": True,
@@ -99,5 +99,5 @@ def verify_token(payload: TokenRequest):
             "sub": decoded.get("sub", ""),
             "aud": decoded.get("aud", "")
         }
-    except Exception as e:
+    except Exception:
         return JSONResponse(status_code=401, content={"valid": False})
